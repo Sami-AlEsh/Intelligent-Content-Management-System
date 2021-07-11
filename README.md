@@ -1,7 +1,7 @@
 
-# AI CMS API
+# ICMS API
 
-AI CMS is a Python api for handling application requests like: text tagging, image labeling ... etc
+ICMS API is a Python api build with fastapi for handling application requests like: text tagging, image labeling ... etc
 
 ## Installation
 
