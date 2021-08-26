@@ -1,11 +1,16 @@
+
 from enum import Enum
 
 from fastapi import FastAPI, UploadFile, File
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
+
+from dto.face_recognition import FaceRecognitionOutput, AddFaceInput
 from dto.auto_tagging import AutoTaggingInput, AutoTaggingOutPut
 from dto.image_labeling import ImageLabelingOutPut
-from models import proccessingText, proccessingImage
+from dto.ocr import OcrOutput
+
+from models import addFace, extractKeyphrases, proccessingImage, recognizeFaces, applyOcr
 
 app = FastAPI()
 
@@ -21,7 +26,7 @@ app.add_middleware(
 async def textTagging(input: AutoTaggingInput):
     print(input.method)
     return {
-        'tags': await proccessingText(input.text, input.method)
+        'tags': await extractKeyphrases(input.text, input.method)
     }
 
 
@@ -30,3 +35,22 @@ async def imageLabeling(file: UploadFile = File(...)):
     return {
         'labels': await proccessingImage(file)
     }
+
+
+@app.post("/face-recognition", response_model=FaceRecognitionOutput, tags=["face-recognition"], name="generate names of faces in given image")
+async def faceRecognition(file: UploadFile = File(...)):
+    return {
+        'faces': await recognizeFaces(file)
+    }
+
+@app.post("/add-face", tags=["add-face"], name="add new face with name")
+async def addNewFace( name: str, file: UploadFile = File(...)):
+    await addFace(name, file)
+    return 'done'
+
+@app.post("/image-ocr", response_model=OcrOutput, tags=["image-ocr"], name="extract text from image using ocr")
+async def imageOcr(file: UploadFile = File(...)):
+   
+   return {
+       'text': await applyOcr(file)
+   }

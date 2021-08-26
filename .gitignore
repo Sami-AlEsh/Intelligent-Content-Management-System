@@ -145,4 +145,5 @@ cython_debug/
 # End of https://www.toptal.com/developers/gitignore/api/python
 
 /keyphrases_extraction/models
+/_face_recognition/data
 */node_modules
