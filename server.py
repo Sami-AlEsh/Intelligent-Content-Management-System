@@ -10,7 +10,7 @@ from dto.auto_tagging import AutoTaggingInput, AutoTaggingOutPut
 from dto.image_labeling import ImageLabelingOutPut
 from dto.ocr import OcrOutput
 
-from models import addFace, extractKeyphrases, proccessingImage, recognizeFaces, applyOcr
+from models import addFace, extractKeyphrases, proccessingImage, recognizeFaces, applyOcr, generateCaption
 
 app = FastAPI()
 
@@ -53,4 +53,11 @@ async def imageOcr(file: UploadFile = File(...)):
    
    return {
        'text': await applyOcr(file)
+   }
+
+@app.post("/image-captioning", tags=["image-captioning"], name="generate caption for given image")
+async def imageCaptioning(file: UploadFile = File(...)):
+   
+   return {
+       'text': await generateCaption(file)
    }
