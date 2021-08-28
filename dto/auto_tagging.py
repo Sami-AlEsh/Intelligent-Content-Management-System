@@ -9,3 +9,7 @@ class AutoTaggingInput(BaseModel):
 
 class AutoTaggingOutPut(BaseModel):
     tags: List[str]
+
+
+
+

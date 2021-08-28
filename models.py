@@ -9,6 +9,8 @@ from _face_recognition.gateway import recognize_faces, add_face, load_image
 from ocr.gateway import extract_text, extract_text_pdf
 from image_captioning.gateway import generate_caption
 
+from dto.text_correcting import WordCorrection
+
 
 async def extractKeyphrases(text: str, method: str) -> List[str]:
     response = extract_keyphrases(text, method=method)
@@ -43,3 +45,14 @@ async def generateCaption(file: UploadFile):
     return generate_caption(file.file.read())
 
 
+async def proccessingCorrectingText(text: str) -> List[WordCorrection]:
+    return [
+        {
+            'word':'error1',
+            'correction':'correct 1'
+        },
+        {
+            'word':'error2',
+            'correction':'correct 2'
+        },
+    ]

@@ -8,9 +8,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from dto.face_recognition import FaceRecognitionOutput, AddFaceInput
 from dto.auto_tagging import AutoTaggingInput, AutoTaggingOutPut
 from dto.image_labeling import ImageLabelingOutPut
+from dto.text_correcting import TextCorrectingOutPut,TextCorrectingInput
 from dto.ocr import OcrOutput
 
-from models import addFace, extractKeyphrases, proccessingImage, recognizeFaces, applyOcr, applyOcrPdf, generateCaption
+from models import addFace, extractKeyphrases, proccessingImage, recognizeFaces, applyOcr, applyOcrPdf, generateCaption, proccessingCorrectingText
 
 app = FastAPI()
 
@@ -68,3 +69,8 @@ async def imageCaptioning(file: UploadFile = File(...)):
    return {
        'text': await generateCaption(file)
    }
+@app.post("/text-correcting", response_model=TextCorrectingOutPut, tags=["text-correcting"], name="get list of wrong words and their correction")
+async def textCorrecting(input: TextCorrectingInput):
+    return {
+        'words': await proccessingCorrectingText(input.text)
+    }
