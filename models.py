@@ -6,7 +6,7 @@ import numpy as np
 
 from keyphrases_extraction.gateway import extract_keyphrases
 from _face_recognition.gateway import recognize_faces, add_face, load_image
-from ocr.gateway import extract_text
+from ocr.gateway import extract_text, extract_text_pdf
 from image_captioning.gateway import generate_caption
 
 
@@ -33,6 +33,11 @@ async def addFace(name: str, file: UploadFile):
 
 async def applyOcr(file: UploadFile):
     return extract_text(file.file.read())
+
+
+async def applyOcrPdf(file: UploadFile):
+    return extract_text_pdf(file.file.read())
+
 
 async def generateCaption(file: UploadFile):
     return generate_caption(file.file.read())

@@ -43,12 +43,7 @@ def load_encoder_decoder():
 
 
 def load_image(image: bytes):
-
-    with open('./image.img', 'wb') as f:
-        f.write(image)
-    
-    img = tf.io.read_file('./image.img')
-    img = tf.image.decode_jpeg(img, channels=3)
+    img = tf.image.decode_jpeg(image, channels=3)
     img = tf.image.resize(img, (299, 299))
     img = tf.keras.applications.inception_v3.preprocess_input(img)
     return img

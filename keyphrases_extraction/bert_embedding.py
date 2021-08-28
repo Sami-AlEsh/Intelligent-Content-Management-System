@@ -14,4 +14,5 @@ def embed_text_bert(text):
 
     hidden_states = out[2]
     embedding = torch.mean(hidden_states[-1], dim=1)
-    return embedding
+    # print(embedding.shape)
+    return embedding.numpy()

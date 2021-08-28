@@ -2,18 +2,19 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import itertools
 from .bert_embedding import embed_text_bert
+from .doc2vec_embedding import embed_text_doc2vec
 from .extract_ner_candidate import get_ner_candidates
 
 
-def embed_rank_bert(text):
+def embed_text(text, embedding_method):
     doc_candidates = get_ner_candidates(text)
-    doc_embedding = embed_text_bert(text).numpy()
-    doc_candidate_embeddings = np.array([embed_text_bert(c).numpy() for c in doc_candidates]).squeeze()
+    doc_embedding = embedding_method(text)
+    doc_candidate_embeddings = np.array([embedding_method(c) for c in doc_candidates]).squeeze()
     return (doc_candidates, doc_embedding, doc_candidate_embeddings)
 
 
-def embed_rank_bert_cs(text, n=10): # cosine similarity
-    doc_candidates, doc_embedding, doc_candidate_embeddings = embed_rank_bert(text)
+def embed_rank_cs(text, n=10, embedding_method=embed_text_doc2vec): # cosine similarity
+    doc_candidates, doc_embedding, doc_candidate_embeddings = embed_text(text, embedding_method)
     doc_keywords = consine_sims(doc_embedding, doc_candidate_embeddings, doc_candidates)
     n = min(n, len(doc_candidates))
     doc_keywords = sorted(doc_keywords, key= lambda tup: tup[1])
@@ -21,28 +22,30 @@ def embed_rank_bert_cs(text, n=10): # cosine similarity
     return [tup[0] for tup in doc_keywords]
 
 
-def embed_rank_bert_mmr(text, n=10): # maximum marginal relevance
-    doc_candidates, doc_embedding, doc_candidate_embeddings = embed_rank_bert(text)
+def embed_rank_mmr(text, n=10, embedding_method=embed_text_doc2vec): # maximum marginal relevance
+    doc_candidates, doc_embedding, doc_candidate_embeddings = embed_text(text, embedding_method)
     doc_keywords_mmr = mmr(doc_embedding, doc_candidate_embeddings, doc_candidates, n, 0.8)
     return doc_keywords_mmr
 
 
-def embed_rank_bert_mss(text, n=10): # max sum similarity
-    doc_candidates, doc_embedding, doc_candidate_embeddings = embed_rank_bert(text)
+def embed_rank_mss(text, n=10, embedding_method=embed_text_doc2vec): # max sum similarity
+    doc_candidates, doc_embedding, doc_candidate_embeddings = embed_text(text, embedding_method)
     doc_keywords_mss = max_sum_sim(doc_embedding, doc_candidate_embeddings, doc_candidates, n, len(doc_candidates))
     return doc_keywords_mss
 
 
-def embed_rank_doc2vec_cs(text, n=10): # cosine similarity
-    pass
+def embed_rank(text, n=10, method=''):
+    
+    options = {
+        'bert_cs': (embed_rank_cs, embed_text_bert),
+        'bert_mss': (embed_rank_mss, embed_text_bert),
+        'bert_mmr': (embed_rank_mmr, embed_text_bert),
+        'doc2vec_cs':  (embed_rank_cs, embed_text_doc2vec),
+        'doc2vec_mss': (embed_rank_mss, embed_text_doc2vec),
+        'doc2vec_mmr': (embed_rank_mmr, embed_text_doc2vec),
+    }
 
-
-def embed_rank_doc2vec_mmr(text, n=10): # maximum marginal relevance
-    pass
-
-
-def embed_rank_doc2vec_mss(text, n=10): # max sum similarity
-    pass
+    return options[method][0](text, n, options[method][1])
 
 
 

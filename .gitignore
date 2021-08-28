@@ -149,3 +149,5 @@ cython_debug/
 /_face_recognition/data
 */node_modules
 *.img
+*.jpg
+*.jpeg

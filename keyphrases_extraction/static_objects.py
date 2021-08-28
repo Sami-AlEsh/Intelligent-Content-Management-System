@@ -1,6 +1,7 @@
 import stanza
 from transformers import BertModel, BertTokenizer
 from camel_tools.disambig.mle import MLEDisambiguator
+from gensim.models import Doc2Vec
 
 
 # nlp = stanza.Pipeline('ar')
@@ -25,3 +26,6 @@ def get_bert_tokenizer():
 def get_mle_disambiguator():
     # return mle_disambiguator
     return MLEDisambiguator.pretrained('calima-msa-r13') # Take long time
+
+def get_doc2vec_model():
+    return Doc2Vec.load('./keyphrases_extraction/models/doc2vec/wiki_full_50ep.bin')
