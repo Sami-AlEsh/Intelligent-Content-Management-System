@@ -1,0 +1,9 @@
+{
+  "plugin.name": "إضافة وجوه",
+  "containers.HomePage.PluginHeader.title": "إضافة وجه جديد",
+  "containers.HomePage.PluginHeader.description": "هنا يمكنك إضافة وجه جديد ليتم التعرف عليه لاحقا عند إضافة أي صورة جديدة",
+  "containers.HomePage.person.name": "اسم الشخص",
+  "containers.HomePage.person.face": "صورة الشخص",
+  "containers.HomePage.enter.name": "أدخل الإسم",
+  "save": "حفظ"
+}

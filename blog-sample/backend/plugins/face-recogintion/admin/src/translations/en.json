@@ -1,0 +1,9 @@
+{
+  "containers.HomePage.PluginHeader.title": "Face Recognition",
+  "containers.HomePage.PluginHeader.description": "Add new Faces to the face recognition operation",
+  "plugin.name": "Add Faces",
+  "containers.HomePage.person.name": "Person Name",
+  "containers.HomePage.person.face": "Peron Face",
+  "containers.HomePage.enter.name": "enter name",
+  "save": "Save"
+}

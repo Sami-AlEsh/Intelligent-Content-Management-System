@@ -1,0 +1,44 @@
+{
+  "name": "strapi-plugin-point-list",
+  "version": "0.1.1",
+  "description": "Fenerate Tags field for strapi",
+  "strapi": {
+    "name": "Generate Tags Field",
+    "icon": "map-marked-alt",
+    "description": "point-list.plugin.description"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akcyp/strapi-plugin-point-list.git"
+  },
+  "bugs": {
+    "url": "https://github.com/akcyp/strapi-plugin-point-list/issues"
+  },
+  "homepage": "https://github.com/akcyp/strapi-plugin-point-list#readme",
+  "keywords": [
+    "strapi",
+    "strapi-plugin",
+    "arena-selecting",
+    "auto-tagging"
+  ],
+  "dependencies": {
+    "@material-ui/core": "^4.12.3",
+    "@material-ui/lab": "^4.0.0-alpha.60",
+    "remove-markdown": "^0.3.0"
+  },
+  "author": {
+    "name": "akcyp",
+    "url": "https://github.com/akcyp"
+  },
+  "maintainers": [
+    {
+      "name": "akcyp",
+      "url": "https://github.com/akcyp"
+    }
+  ],
+  "engines": {
+    "node": ">=10.16.0 <=14.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "MIT"
+}
