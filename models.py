@@ -1,20 +1,26 @@
 from fastapi import UploadFile
 from typing import List
-from PIL import Image
-import io
-import numpy as np
 
 from keyphrases_extraction.gateway import extract_keyphrases
 from _face_recognition.gateway import recognize_faces, add_face, load_image
 from ocr.gateway import extract_text, extract_text_pdf
 from image_captioning.gateway import generate_caption
+from text_correction.gateway import correct_text
 
 from dto.text_correcting import WordCorrection
 
+import cProfile, pstats
+
 
 async def extractKeyphrases(text: str, method: str) -> List[str]:
+    # profile = cProfile.Profile()
+    # profile.enable()
+    # response = profile.runcall(extract_keyphrases, text, method=method)
     response = extract_keyphrases(text, method=method)
-    print(response)
+    # profile.disable()
+    # print(response)
+    # stats = pstats.Stats(profile).sort_stats('ncalls')
+    # profile.print_stats()
     return response
 
 
@@ -45,14 +51,5 @@ async def generateCaption(file: UploadFile):
     return generate_caption(file.file.read())
 
 
-async def proccessingCorrectingText(text: str) -> List[WordCorrection]:
-    return [
-        {
-            'word':'error1',
-            'correction':'correct 1'
-        },
-        {
-            'word':'error2',
-            'correction':'correct 2'
-        },
-    ]
+async def correctText(text: str):
+    return correct_text(text)

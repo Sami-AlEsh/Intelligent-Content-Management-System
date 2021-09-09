@@ -1,20 +1,35 @@
+from keyphrases_extraction.clean_text import clean
+from keyphrases_extraction.utils import timeit
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import itertools
 from .bert_embedding import embed_text_bert
 from .doc2vec_embedding import embed_text_doc2vec
 from .extract_ner_candidate import get_ner_candidates
+from .static_objects import get_bert_model, get_bert_tokenizer, get_doc2vec_model
 
-
-def embed_text(text, embedding_method):
+@timeit
+def embed_text(text, embedding_method, embedding_method_args):
     doc_candidates = get_ner_candidates(text)
-    doc_embedding = embedding_method(text)
-    doc_candidate_embeddings = np.array([embedding_method(c) for c in doc_candidates]).squeeze()
+    # print(text)
+    # print(clean(text))
+    print('-'*50)
+    doc_embedding = embedding_method(clean(text), *embedding_method_args)
+    doc_candidate_embeddings = np.array([embedding_method(c, *embedding_method_args) for c in doc_candidates]).squeeze()
     return (doc_candidates, doc_embedding, doc_candidate_embeddings)
 
 
-def embed_rank_cs(text, n=10, embedding_method=embed_text_doc2vec): # cosine similarity
-    doc_candidates, doc_embedding, doc_candidate_embeddings = embed_text(text, embedding_method)
+def embed_rank_cs(text, n=10, embedding_method=embed_text_doc2vec, embedding_method_args=()): # cosine similarity
+    doc_candidates, doc_embedding, doc_candidate_embeddings = embed_text(text, embedding_method, embedding_method_args)
+    if len(doc_candidates) == 0:
+        return []
+
+    if len(doc_candidates) == 1:
+        doc_candidate_embeddings = doc_candidate_embeddings.reshape(1, -1)
+
+    print(doc_embedding.shape)
+    print(doc_candidate_embeddings.shape)
+    
     doc_keywords = consine_sims(doc_embedding, doc_candidate_embeddings, doc_candidates)
     n = min(n, len(doc_candidates))
     doc_keywords = sorted(doc_keywords, key= lambda tup: tup[1])
@@ -22,30 +37,32 @@ def embed_rank_cs(text, n=10, embedding_method=embed_text_doc2vec): # cosine sim
     return [tup[0] for tup in doc_keywords]
 
 
-def embed_rank_mmr(text, n=10, embedding_method=embed_text_doc2vec): # maximum marginal relevance
-    doc_candidates, doc_embedding, doc_candidate_embeddings = embed_text(text, embedding_method)
+def embed_rank_mmr(text, n=10, embedding_method=embed_text_doc2vec, embedding_method_args=()): # maximum marginal relevance
+    doc_candidates, doc_embedding, doc_candidate_embeddings = embed_text(text, embedding_method, embedding_method_args)
     doc_keywords_mmr = mmr(doc_embedding, doc_candidate_embeddings, doc_candidates, n, 0.8)
     return doc_keywords_mmr
 
 
-def embed_rank_mss(text, n=10, embedding_method=embed_text_doc2vec): # max sum similarity
-    doc_candidates, doc_embedding, doc_candidate_embeddings = embed_text(text, embedding_method)
+def embed_rank_mss(text, n=10, embedding_method=embed_text_doc2vec, embedding_method_args=()): # max sum similarity
+    doc_candidates, doc_embedding, doc_candidate_embeddings = embed_text(text, embedding_method, embedding_method_args)
     doc_keywords_mss = max_sum_sim(doc_embedding, doc_candidate_embeddings, doc_candidates, n, len(doc_candidates))
     return doc_keywords_mss
 
 
 def embed_rank(text, n=10, method=''):
+    # bert_tokenizer = get_bert_tokenizer()
+    # bert_model = get_bert_model()
     
     options = {
-        'bert_cs': (embed_rank_cs, embed_text_bert),
-        'bert_mss': (embed_rank_mss, embed_text_bert),
-        'bert_mmr': (embed_rank_mmr, embed_text_bert),
-        'doc2vec_cs':  (embed_rank_cs, embed_text_doc2vec),
-        'doc2vec_mss': (embed_rank_mss, embed_text_doc2vec),
-        'doc2vec_mmr': (embed_rank_mmr, embed_text_doc2vec),
+        'bert_cs': (embed_rank_cs, embed_text_bert, lambda: (get_bert_model(), get_bert_tokenizer())),
+        'bert_mss': (embed_rank_mss, embed_text_bert, lambda: (get_bert_model(), get_bert_tokenizer())),
+        'bert_mmr': (embed_rank_mmr, embed_text_bert, lambda: (get_bert_model(), get_bert_tokenizer())),
+        'doc2vec_cs':  (embed_rank_cs, embed_text_doc2vec, lambda: (get_doc2vec_model(), )),
+        'doc2vec_mss': (embed_rank_mss, embed_text_doc2vec, lambda: (get_doc2vec_model(), )),
+        'doc2vec_mmr': (embed_rank_mmr, embed_text_doc2vec, lambda: (get_doc2vec_model(), )),
     }
 
-    return options[method][0](text, n, options[method][1])
+    return options[method][0](text, n, options[method][1], options[method][2]())
 
 
 

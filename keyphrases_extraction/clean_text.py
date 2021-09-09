@@ -15,10 +15,9 @@ def clean(text):
     
     return text
 
-def morphological_tokenize(text):
+def morphological_tokenize(text, disambiguator=None):
     #     scheme = 'atbtok' || 'd3tok' || 'bwtok'
-    mleDisambiguator = get_mle_disambiguator()
-    morphologicalTokenizer = MorphologicalTokenizer(disambiguator=mleDisambiguator, scheme='atbtok', split=True)
+    morphologicalTokenizer = MorphologicalTokenizer(disambiguator=disambiguator, scheme='atbtok', split=True)
     tokens = [
         [w] if len(w) <= 3 else morphologicalTokenizer.tokenize([w])
         for w in simple_word_tokenize(text) if len(w) > 1

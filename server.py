@@ -11,7 +11,10 @@ from dto.image_labeling import ImageLabelingOutPut
 from dto.text_correcting import TextCorrectingOutPut,TextCorrectingInput
 from dto.ocr import OcrOutput
 
-from models import addFace, extractKeyphrases, proccessingImage, recognizeFaces, applyOcr, applyOcrPdf, generateCaption, proccessingCorrectingText
+from copy import deepcopy
+import re
+
+from models import addFace, extractKeyphrases, proccessingImage, recognizeFaces, applyOcr, applyOcrPdf, generateCaption, correctText
 
 app = FastAPI()
 
@@ -65,12 +68,68 @@ async def pdfOcr(file: UploadFile = File(...)):
 
 @app.post("/image-captioning", tags=["image-captioning"], name="generate caption for given image")
 async def imageCaptioning(file: UploadFile = File(...)):
-   
-   return {
-       'text': await generateCaption(file)
-   }
-@app.post("/text-correcting", response_model=TextCorrectingOutPut, tags=["text-correcting"], name="get list of wrong words and their correction")
+
+    caption = await generateCaption(deepcopy(file))
+
+    caption = ' '.join([t for t in caption.split(' ') if t != '<end>'])
+
+    ocr = await applyOcr(deepcopy(file))
+    persons = await recognizeFaces(deepcopy(file))
+
+    if len(ocr.strip()) > 0 :
+        caption += f'و يوجد نص: {ocr}'
+
+    known_persons = []
+    if len(persons) > 0:
+        un_cnt = 0
+        cnt = 0
+        for x in persons: 
+            if x == 'Unknown': 
+                un_cnt += 1
+            else:
+                known_persons.append(x)
+                cnt += 1
+        
+        if cnt > 0:
+            caption += ' | '
+            caption += f'و يوجد {",".join(known_persons)}'
+        
+        if un_cnt > 0 and un_cnt == 1:
+            caption += ' | '
+            caption += f'و يوجد شخص غير معروف'
+        
+        if un_cnt > 1:
+            caption += ' | '
+            caption += f'و يوجد {un_cnt} شخص غير معروف'
+    
+    return {
+        'text': caption
+    }
+
+
+@app.post("/text-correcting", tags=["text-correcting"], name="get list of wrong words and their correction")
 async def textCorrecting(input: TextCorrectingInput):
     return {
-        'words': await proccessingCorrectingText(input.text)
+        'words': await correctText(input.text)
+    }
+
+@app.post("/format-correcting", tags=["text-correcting"], name="get list of wrong words and their correction")
+async def formatCorrecting(input: TextCorrectingInput):
+    
+    formats_re  = [("[\s]{2,}", " "), ("\s،", "،"), ("،[^\s]" ,"، "), ("\s\.","."),("[^\s]\(", " \("),("\s\)", ")"), ("\([\s]", "(")]
+    
+    res = []
+
+    for wrong_format, correct_format in formats_re:
+      for match in re.finditer(wrong_format, input.text):
+        res.append((match.start(), match.end(), input.text[match.start(): match.end()], correct_format))
+
+    return {
+        'words': res
+    }
+
+@app.get("/", name="get list of wrong words and their correction")
+async def index():
+    return {
+        'words': 'hello world'
     }
